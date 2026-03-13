@@ -3,7 +3,7 @@
  *
  * India mein form bharna ek art hai! College admission ka form validate
  * karna hai. Har field ke apne rules hain. Tujhe ek errors object return
- * karna hai jisme galat fields ke error messages hain. Agar sab sahi hai
+ * karna hai jisme galat fields ke errors messages hain. Agar sab sahi hai
  * toh empty errors object aur isValid = true.
  *
  * formData object:
@@ -23,7 +23,7 @@
  *
  *   4. age: must be a number between 16 and 100 inclusive, and an integer.
  *      JUGAAD: Agar string mein number diya hai (e.g., "22"), toh parseInt()
- *      se convert karo. Agar convert nahi ho paya (isNaN), toh error.
+ *      se convert karo. Agar convert nahi ho paya (isNaN), toh errors.
  *      Error: "Age must be an integer between 16 and 100"
  *
  *   5. pincode: must be a string of exactly 6 digits, NOT starting with "0"
@@ -38,7 +38,7 @@
  *      Error: "Must agree to terms"
  *
  * Return:
- *   { isValid: boolean, errors: { fieldName: "error message", ... } }
+ *   { isValid: boolean, errors: { fieldName: "errors message", ... } }
  *   - isValid is true ONLY when errors object has zero keys
  *
  * Hint: Use typeof, Boolean(), parseInt(), isNaN(), Number.isInteger(),
@@ -63,4 +63,68 @@
  */
 export function validateForm(formData) {
   // Your code here
+  const errors = {};
+  const {name,email,phone,age,pincode,state,agreeTerms} = formData;
+  if(
+    typeof name !== 'string' ||
+    name.trim().length < 2 ||
+    name.trim().length > 50
+  ){
+    errors.name = "Name must be 2-50 characters";
+  }
+
+  if(
+    typeof email !== 'string' ||
+    email.indexOf('@') === -1 ||
+    email.indexOf('@') !== email.lastIndexOf('@') ||
+    !email.slice(email.indexOf('@')).includes('.')
+  ){
+    errors.email = "Invalid email format";
+  }
+
+  if(
+    typeof phone !== 'string' ||
+    phone.length !== 10 ||
+    !['6','7','8','9'].includes(phone[0]) ||
+    !/^\d{10}$/.test(phone)
+  ){
+    errors.phone = "Invalid Indian phone number";
+  }
+
+  let ageValue = age;
+  if(typeof age === 'string'){
+    ageValue = parseInt(age,10);
+  }
+  if(
+    typeof ageValue !== 'number' ||
+    isNaN(ageValue) ||
+    !Number.isInteger(ageValue) ||
+    ageValue < 16 ||
+    ageValue > 100
+  ){
+    errors.age = "Age must be an integer between 16 and 100";
+  }
+
+  if(
+    typeof pincode !== 'string' ||
+    pincode.length !== 6 ||
+    pincode[0] === '0' ||
+    !/^\d{6}$/.test(pincode)
+  ){
+    errors.pincode = "Invalid Indian pincode" ;
+  }
+
+  const stateValue = state?.trim()?? "";
+  if(stateValue === ""){
+    errors.state = "State is required";
+  }
+
+  if(!agreeTerms){
+    errors.agreeTerms = "Must agree to terms";
+  }
+
+  return {
+    isValid : Object.keys(errors).length === 0,
+    errors
+  };
 }
